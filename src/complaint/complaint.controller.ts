@@ -6,7 +6,7 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFiles,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -68,7 +68,7 @@ export class ComplaintController {
   @ApiBody({ type: CreateComplaintDto })
   @ResponseMessage({ message: 'Complaint created successfully.' })
   async createComplaint(
-    @UploadedFiles() image: Express.Multer.File,
+    @UploadedFile() image: Express.Multer.File,
     @GetUser() user: User,
     @Body() complaint: CreateComplaintDto,
   ) {

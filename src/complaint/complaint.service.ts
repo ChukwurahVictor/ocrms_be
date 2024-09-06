@@ -38,8 +38,8 @@ export class ComplaintService extends CrudService<
     user: User,
     file: Express.Multer.File,
   ) {
-    console.log('image', file);
-    console.log('image', image);
+    console.log('image', file); //this returns image buffer
+    console.log('image', image); // this returns undefined
     // console.log('title', title, rest);
     // console.log(
     //   '================================================================',
@@ -100,12 +100,26 @@ export class ComplaintService extends CrudService<
       //   );
       //   await Promise.all(createImagesPromises);
       // });
-      const uploadComplaintImage = await this.prisma.complaintImages.create({
+
+      // const uploadComplaintImage = await this.prisma.complaintImages.create({
+      //   data: {
+      //     complaintId: complaint.id,
+      //     image: imageResult,
+      //     createdBy: user.id,
+      //   },
+      // });
+
+      const updatedComplaint = await this.prisma.complaint.update({
+        where: { id: complaint.id },
         data: {
-          complaintId: complaint.id,
-          image: imageResult?.secure_url,
-          createdBy: user.id,
+          images: {
+            create: {
+              image: imageResult,
+              createdBy: user.id,
+            },
+          },
         },
+        include: { images: true },
       });
 
       await this.messagingQueue.queueCreateComplaintEmail({
@@ -114,10 +128,7 @@ export class ComplaintService extends CrudService<
         email: user?.email,
       });
 
-      return this.prisma.complaint.findUnique({
-        where: { id: complaint.id },
-        include: { images: true },
-      });
+      return updatedComplaint;
     } catch (error) {
       console.log(error);
       throw error;
