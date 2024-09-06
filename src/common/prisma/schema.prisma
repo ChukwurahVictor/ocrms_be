@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRoles {
+  Admin
+  User
+  Staff
+  Super_Admin
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum ComplaintStatus {
+  Pending
+  In_progress
+  Resolved
+  Closed
+  Escalated
+  Draft
+  Archived
+}
+
+enum PriorityLevel {
+  Low
+  Medium
+  High
+  Urgent
+}
+
+enum Rating {
+  Very_Poor
+  Poor
+  Average
+  Good
+  Very_Good
+}
+
+model User {
+  id            String      @id @default(uuid()) @db.Uuid
+  firstName     String      @db.VarChar
+  middleName    String?     @db.VarChar
+  lastName      String      @db.VarChar
+  email         String      @unique @db.VarChar
+  password      String
+  phone         String?     @db.VarChar(14)
+  gender        Gender?
+  profileImgUrl String?     @db.VarChar
+  staffId       String?     @db.VarChar
+  status        Boolean     @default(true)
+  userRole      UserRoles   @default(User)
+  dateOfBirth   String?     @db.VarChar
+  departmentId  String?     @db.Uuid
+  complaints    Complaint[] @relation("UserComplaints")
+  feedbacks     Feedback[]  @relation("UserFeedbacks")
+  createdAt     DateTime    @default(now()) @db.Timestamptz(6)
+  createdBy     String?     @db.VarChar
+  updatedAt     DateTime    @updatedAt() @db.Timestamptz(6)
+  updatedBy     String?     @db.VarChar
+  department    Department? @relation(fields: [departmentId], references: [id])
+
+  @@map("users")
+}
+
+model Category {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  complaints  Complaint[]
+  createdAt   DateTime    @default(now()) @db.Timestamptz(6)
+  createdBy   String?     @db.VarChar
+  updatedAt   DateTime    @updatedAt() @db.Timestamptz(6)
+  updatedBy   String?     @db.VarChar
+
+  @@map("categories")
+}
+
+model Complaint {
+  id                      String            @id @default(uuid()) @db.Uuid
+  referenceNo             String
+  title                   String
+  description             String?
+  status                  ComplaintStatus
+  imageId                 String?           @db.Uuid
+  images                  ComplaintImages[]
+  priorityLevel           PriorityLevel?    @default(Low)
+  isAnonymous             Boolean           @default(false)
+  categoryId              String            @db.Uuid
+  userId                  String            @db.Uuid
+  user                    User              @relation("UserComplaints", fields: [userId], references: [id])
+  feedback                Feedback[]
+  rating                  Rating?
+  estimatedResolutionTime String?
+  resolutionTime          DateTime?         @db.Timestamptz(6)
+  category                Category          @relation(fields: [categoryId], references: [id])
+  department              Department?       @relation(fields: [departmentId], references: [id])
+  departmentId            String?           @db.Uuid
+  createdAt               DateTime          @default(now()) @db.Timestamptz(6)
+  createdBy               String?           @db.VarChar
+  updatedAt               DateTime          @updatedAt() @db.Timestamptz(6)
+  updatedBy               String?           @db.VarChar
+  statusUpdateHistory     ComplaintStatusUpdateHistory[]
+
+  @@unique([referenceNo])
+  @@map("complaints")
+}
+
+model ComplaintStatusUpdateHistory {
+  id            String          @id @default(uuid()) @db.Uuid
+  complaintId   String          @db.Uuid
+  updatedStatus ComplaintStatus
+  createdAt     DateTime        @default(now()) @db.Timestamptz(6)
+  createdBy     String?         @db.VarChar
+  updatedBy     String          @db.VarChar
+  updatedAt     DateTime        @updatedAt() @db.Timestamptz(6)
+  complaint     Complaint       @relation(fields: [complaintId], references: [id])
+
+  @@map("complaint_history")
+}
+
+model Department {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String
+  description String?     @db.VarChar
+  staff       User[]
+  complaints  Complaint[]
+  status        Boolean     @default(true)
+  createdAt   DateTime    @default(now()) @db.Timestamptz(6)
+  createdBy   String?     @db.VarChar
+  updatedAt   DateTime    @updatedAt() @db.Timestamptz(6)
+  updatedBy   String?     @db.VarChar
+
+  @@map("departments")
+}
+
+model ComplaintImages {
+  id          String    @id @default(uuid()) @db.Uuid
+  complaintId String    @db.Uuid
+  image       String
+  complaint   Complaint @relation(fields: [complaintId], references: [id])
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  createdBy   String?   @db.VarChar
+  updatedAt   DateTime  @updatedAt() @db.Timestamptz(6)
+  updatedBy   String?   @db.VarChar
+
+  @@map("complaint-images")
+}
+
+model Feedback {
+  id          String    @id @default(uuid()) @db.Uuid
+  comment     String
+  complaintId String    @db.Uuid
+  complaint   Complaint @relation(fields: [complaintId], references: [id])
+  userId      String    @db.Uuid
+  user        User      @relation("UserFeedbacks", fields: [userId], references: [id])
+  rating      Rating?
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  createdBy   String?   @db.VarChar
+  updatedAt   DateTime  @updatedAt() @db.Timestamptz(6)
+  updatedBy   String?   @db.VarChar
+
+  @@map("feedbacks")
+}
