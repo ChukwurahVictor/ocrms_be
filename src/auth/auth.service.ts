@@ -9,7 +9,6 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AppUtilities } from 'src/common/utilities';
 import { SignupDto } from './dto/signup.dto';
-import { MailingService } from 'src/common/messaging/mailing/mailing.service';
 import { CacheService } from 'src/common/cache/cache.service';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -24,7 +23,6 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
-    private mailingService: MailingService,
     private messagingQueue: MessagingQueueProducer,
     private cacheService: CacheService,
   ) {}
@@ -145,11 +143,6 @@ export class AuthService {
       link: generatedToken,
     });
 
-    // await this.mailingService.sendResetToken(
-    //   user.email,
-    //   user.firstName,
-    //   generatedToken,
-    // );
     return {
       message: 'Password reset link sent to your email',
     };

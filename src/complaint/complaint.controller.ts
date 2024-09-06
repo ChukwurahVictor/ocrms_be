@@ -28,11 +28,7 @@ import { AssignComplaintDto } from './dto/assign-complaint.dto';
 import { AdminAuthGuard } from 'src/auth/guard/admin-auth.guard';
 import { StaffAuthGuard } from 'src/auth/guard/auth.guard';
 import { FetchComplaintsDto } from './dto/fetch-complaint.dto';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-  FilesInterceptor,
-} from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AddFeedbackDto } from './dto/add-feeback.dto';
 
 @ApiBearerAuth()
@@ -56,14 +52,6 @@ export class ComplaintController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a complaint.' })
   @UseInterceptors(FileInterceptor('image'))
-  // @UseInterceptors(
-  //   FilesInterceptor('images', 4, {
-  //     limits: { files: 4 },
-  //     fileFilter: (req, file, cb) => {
-  //       cb(null, true);
-  //     },
-  //   }),
-  // )
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateComplaintDto })
   @ResponseMessage({ message: 'Complaint created successfully.' })
@@ -72,12 +60,7 @@ export class ComplaintController {
     @GetUser() user: User,
     @Body() complaint: CreateComplaintDto,
   ) {
-    return this.complaintService.createComplaint(
-      complaint,
-      user,
-      image,
-      // complaint.images,
-    );
+    return this.complaintService.createComplaint(complaint, user, image);
   }
 
   @Get('/summary')

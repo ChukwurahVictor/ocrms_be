@@ -27,16 +27,12 @@ export class MessagingQueueConsumer extends QueueProcessor {
 
   @Process({ name: JOBS.QUEUE_RESET_TOKEN_EMAIL })
   async queueResetTokenEmail({ data }: Job<IResetPassword>, token) {
-    console.log('data', data);
-    console.log('token', token);
     await this.mailingService.sendResetToken(data.email, data.firstName, token);
-    // return 'Reset Token Email Sent';
   }
 
   @Process({ name: JOBS.QUEUE_WELCOME_EMAIL })
   async queueSendWelcomeEmail({ data }: Job<IWelcomeEmail>) {
     await this.mailingService.sendWelcomeEmail(data);
-    // return 'Welcome Email Sent';
   }
 
   @Process({ name: JOBS.QUEUE_ASSIGN_COMPLAINT_EMAIL })

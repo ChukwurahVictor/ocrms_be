@@ -119,11 +119,27 @@ export class StaffService {
       throw new BadRequestException('Staff not found.');
     }
 
-    // await this.messagingQueue.queueWelcomeEmail({
-    //   user: staff,
-    // });
+    const password = await AppUtilities.generatePassword();
+    const hash = await AppUtilities.hashPassword(password);
 
-    // await this.mailingService.sendResetToken(staff, '2345678');
-    // await this.mailingService.sendWelcomeEmail(staff);
+    try {
+      const updatedStaff = await this.prisma.user.update({
+        where: { id: staff.id },
+        data: {
+          password: hash,
+        },
+      });
+
+      // send mail
+      await this.messagingQueue.queueCreateStaffEmail({
+        firstName: staff.firstName,
+        email: staff.email,
+        password,
+      });
+
+      return AppUtilities.removeSensitiveData(updatedStaff, 'password');
+    } catch (error) {
+      throw error;
+    }
   }
 }

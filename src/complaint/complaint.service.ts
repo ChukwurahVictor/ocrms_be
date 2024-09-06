@@ -17,7 +17,6 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { MailingService } from 'src/common/messaging/mailing/mailing.service';
 import { MessagingQueueProducer } from 'src/common/messaging/queue/producer';
 import { AddFeedbackDto } from './dto/add-feeback.dto';
-// import { UploadQueueProducer } from 'src/common/cloudinary/queue/producer';
 
 @Injectable()
 export class ComplaintService extends CrudService<
@@ -38,20 +37,6 @@ export class ComplaintService extends CrudService<
     user: User,
     file: Express.Multer.File,
   ) {
-    console.log('image', file); //this returns image buffer
-    console.log('image', image); // this returns undefined
-    // console.log('title', title, rest);
-    // console.log(
-    //   '================================================================',
-    // );
-    // console.log('images', images);
-    // console.log(
-    //   '================================================================',
-    // );
-    // // console.log('image', image);
-    // console.log(
-    //   '================================================================',
-    // );
     const referenceNo = await AppUtilities.generateReferenceNo();
     try {
       const complaint = await this.prisma.complaint.create({
@@ -64,19 +49,6 @@ export class ComplaintService extends CrudService<
           userId: user.id,
         },
       });
-      // let imageResults = [];
-      // if (images && images.length > 0) {
-      //   const uploadPromises = images.map((image, index) => {
-      //     console.log(`Uploading image ${index}:`, image);
-      //     return this.cloudinaryService.uploadImage(
-      //       image,
-      //       'complaint',
-      //       image.originalname,
-      //     );
-      //   });
-
-      //   imageResults = await Promise.all(uploadPromises);
-      // }
       const uploadImage = file
         ? await this.cloudinaryService.uploadImage(
             file,
@@ -88,27 +60,6 @@ export class ComplaintService extends CrudService<
       const imageResult = uploadImage?.secure_url || '';
 
       console.log('imageResults: ', imageResult);
-      // await this.prisma.$transaction(async (prisma: PrismaClient) => {
-      //   const createImagesPromises = imageResults.map((uploadResult) =>
-      //     prisma.complaintImages.create({
-      //       data: {
-      //         complaintId: complaint.id,
-      //         image: uploadResult?.secure_url,
-      //         createdBy: user.id,
-      //       },
-      //     }),
-      //   );
-      //   await Promise.all(createImagesPromises);
-      // });
-
-      // const uploadComplaintImage = await this.prisma.complaintImages.create({
-      //   data: {
-      //     complaintId: complaint.id,
-      //     image: imageResult,
-      //     createdBy: user.id,
-      //   },
-      // });
-
       const updatedComplaint = await this.prisma.complaint.update({
         where: { id: complaint.id },
         data: {
@@ -170,6 +121,7 @@ export class ComplaintService extends CrudService<
         department: true,
         user: true,
         category: true,
+        images: true,
         feedback: {
           include: {
             user: true,
@@ -279,7 +231,6 @@ export class ComplaintService extends CrudService<
       },
     });
 
-    console.log('updatedComplaint', updatedComplaint);
     // send mail
 
     return updatedComplaint;
@@ -374,7 +325,6 @@ export class ComplaintService extends CrudService<
           status: 'Complaints Resolution in Progress',
           count: summary.inProgress,
         },
-        // { status: 'Complaints in Draft', count: summary.assigned },
         { status: 'Complaints Resolved', count: summary.resolved },
       ];
     }
@@ -387,7 +337,6 @@ export class ComplaintService extends CrudService<
           status: 'Complaints Resolution in Progress',
           count: summary.inProgress,
         },
-        // { status: 'Complaints in Draft', count: summary.assigned },
         { status: 'Complaints Resolved', count: summary.resolved },
       ];
     }
@@ -399,7 +348,6 @@ export class ComplaintService extends CrudService<
         status: 'Complaints Resolution in Progress',
         count: summary.inProgress,
       },
-      // { status: 'Complaints Assigned', count: summary.assigned },
       { status: 'Complaints Resolved', count: summary.resolved },
     ];
   }
@@ -496,7 +444,6 @@ export class ComplaintService extends CrudService<
         (currentDate.getTime() - new Date(complaint.createdAt).getTime()) /
           (1000 * 60 * 60 * 24),
       );
-      // return { name: complaint.title, count: openDays };
       return { name: complaint.title, count: `${openDays} days` };
     });
 
@@ -505,7 +452,6 @@ export class ComplaintService extends CrudService<
       .sort((a: any, b: any) => a.count - b.count)
       .slice(0, 10);
 
-    // const sortedComplaints = openComplaints.sort((a, b) => a.count - b.count);
     const sortedComplaints = openComplaints.sort((a, b) =>
       a.count.localeCompare(b.count),
     );

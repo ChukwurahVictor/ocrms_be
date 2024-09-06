@@ -77,8 +77,8 @@ export class AppUtilities {
   }
 
   public static removeSensitiveData(data: any, deleteKeys: any, remove = true) {
-    if (typeof data != 'object') return; // if data not object
-    if (!data) return; // null object
+    if (typeof data != 'object') return;
+    if (!data) return;
 
     for (const key in data) {
       if (deleteKeys.includes(key)) {
