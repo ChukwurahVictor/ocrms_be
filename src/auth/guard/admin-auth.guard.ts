@@ -22,7 +22,7 @@ export class AdminAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    if (user.userRole !== 'Admin') {
+    if (user.userRole !== 'Admin' && user.userRole !== 'Super_Admin') {
       throw new ForbiddenException(
         'User cannot access this resource. You are not an Admin',
       );

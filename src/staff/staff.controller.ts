@@ -12,7 +12,6 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseMessage } from 'src/common/decorators/response.decorator';
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateStaffDto } from './dto/update-staff.dto';
-import { ResendWecomeEmailDto } from './dto/resend-welcome-mail.dto';
 import { AdminAuthGuard } from 'src/auth/guard/admin-auth.guard';
 
 @ApiBearerAuth()
@@ -43,17 +42,31 @@ export class StaffController {
     return this.staffService.createStaff(staff);
   }
 
-  @Patch(':id')
+  @Patch('/:id/disable')
+  @ApiOperation({ summary: 'Disable a staff.' })
+  @ResponseMessage({ message: 'Staff disabled successfully.' })
+  async disableStaff(@Param('id') id: string) {
+    return this.staffService.disableStaff(id);
+  }
+
+  @Patch('/:id/enable')
+  @ApiOperation({ summary: 'Enable a staff.' })
+  @ResponseMessage({ message: 'Staff enabled successfully.' })
+  async enableStaff(@Param('id') id: string) {
+    return this.staffService.enableStaff(id);
+  }
+
+  @Post('/:id/resend-welcome-email')
+  @ApiOperation({ summary: 'Resend welcome email.' })
+  @ResponseMessage({ message: 'Welcome email resent successfully.' })
+  async resendWelcomeEmail(@Param('id') id: string) {
+    return this.staffService.resendWelcomeEmail(id);
+  }
+
+  @Patch('/:id')
   @ApiOperation({ summary: 'Update a staff.' })
   @ResponseMessage({ message: 'Staff updated successfully.' })
   async updateStaff(@Param('id') id: string, @Body() staff: UpdateStaffDto) {
     return this.staffService.updateStaff(id, staff);
-  }
-
-  @Post('resend-welcome-email')
-  @ApiOperation({ summary: 'Resend welcome email.' })
-  @ResponseMessage({ message: 'Welcome email resent successfully.' })
-  async resendWelcomeEmail(@Body() staff: ResendWecomeEmailDto) {
-    return this.staffService.resendWelcomeEmail(staff);
   }
 }

@@ -75,6 +75,9 @@ export class AuthService {
 
     if (!verifyPass) throw new UnauthorizedException('Incorrect Credentials');
 
+    if (!user.status)
+      throw new UnauthorizedException('User disabled. Contact Admin');
+
     const token = await this.signToken(user.id, user.email);
 
     const [, , sessionId] = token.split('.');

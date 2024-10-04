@@ -27,6 +27,9 @@ export class StaffAuthGuard extends AuthGuard('jwt') {
         'User cannot access this resource. You are not an Admin or Staff',
       );
     }
+    if (!user.status) {
+      throw new UnauthorizedException('User is disabled');
+    }
 
     return true;
   }

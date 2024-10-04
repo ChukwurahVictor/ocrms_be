@@ -23,8 +23,7 @@ export class SuperAdminAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    // if (user.userRole !== UserRole.SUPER_ADMIN) {
-    if (user.userRole !== UserRole.ADMIN) {
+    if (user.userRole !== UserRole.SUPER_ADMIN) {
       throw new ForbiddenException(
         'User cannot access this resource. You are not a Super Admin',
       );

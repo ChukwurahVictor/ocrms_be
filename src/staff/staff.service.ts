@@ -9,7 +9,6 @@ import { AppUtilities } from 'src/common/utilities';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { UserRole } from 'src/common/interfaces';
 import { MailingService } from 'src/common/messaging/mailing/mailing.service';
-import { ResendWecomeEmailDto } from './dto/resend-welcome-mail.dto';
 import { MessagingQueueProducer } from 'src/common/messaging/queue/producer';
 
 @Injectable()
@@ -110,9 +109,9 @@ export class StaffService {
     return AppUtilities.removeSensitiveData(updatedUSer, 'password');
   }
 
-  async resendWelcomeEmail(dto: ResendWecomeEmailDto) {
+  async resendWelcomeEmail(id: string) {
     const staff = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+      where: { id: id },
     });
 
     if (!staff) {
@@ -141,5 +140,43 @@ export class StaffService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async disableStaff(id: string) {
+    const staff = await this.prisma.user.findUnique({
+      where: { id: id },
+    });
+
+    if (!staff) {
+      throw new BadRequestException('Staff not found.');
+    }
+
+    const updatedStaff = await this.prisma.user.update({
+      where: { id: staff.id },
+      data: {
+        status: false,
+      },
+    });
+
+    return AppUtilities.removeSensitiveData(updatedStaff, 'password');
+  }
+
+  async enableStaff(id: string) {
+    const staff = await this.prisma.user.findUnique({
+      where: { id: id },
+    });
+
+    if (!staff) {
+      throw new BadRequestException('Staff not found.');
+    }
+
+    const updatedStaff = await this.prisma.user.update({
+      where: { id: staff.id },
+      data: {
+        status: true,
+      },
+    });
+
+    return AppUtilities.removeSensitiveData(updatedStaff, 'password');
   }
 }

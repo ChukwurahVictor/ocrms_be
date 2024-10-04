@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PriorityLevel, Prisma, PrismaClient, User } from '@prisma/client';
+import { PriorityLevel, Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateComplaintDto } from './dto/create-complaint.dto';
 import { UpdateComplaintDto } from './dto/update-complaint.dto';
@@ -33,7 +33,7 @@ export class ComplaintService extends CrudService<
   }
 
   async createComplaint(
-    { title, description, categoryId, image, ...rest }: CreateComplaintDto,
+    { title, description, categoryId, image }: CreateComplaintDto,
     user: User,
     file: Express.Multer.File,
   ) {
@@ -156,7 +156,11 @@ export class ComplaintService extends CrudService<
         category: true,
         department: true,
         statusUpdateHistory: true,
-        feedback: true,
+        feedback: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 

@@ -32,14 +32,14 @@ promises.push(
       const superAdminUser = await prisma.user.upsert({
         where: { email: env('ADMIN_EMAIL') },
         update: {
-          userRole: UserRole.ADMIN,
+          userRole: UserRole.SUPER_ADMIN,
         },
         create: {
           firstName: env('ADMIN_NAME'),
-          lastName: '',
+          lastName: env('ADMIN_LASTNAME'),
           phone: '',
           email: env('ADMIN_EMAIL'),
-          userRole: UserRole.ADMIN,
+          userRole: UserRole.SUPER_ADMIN,
           password: await hashpassword(env('ADMIN_PASS')),
         },
       });
